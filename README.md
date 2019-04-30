@@ -9,7 +9,7 @@ The approach would also be simple if it wasn't for the validations one must do f
 
 ## Example 1: Incoming payment (installment or in cash)
 
-Whenever we have an incoming payment, the applications must check if there's a credit transaction that wasn't yet zeroed. In order to do so, it must:
+Whenever we have an incoming payment, the applications must check if there's a credit transaction that wasn't yet zeroed and, if so, create some related events. Let's say that, in this case, we do have some values that were already credited and we must validate it. In order to do so, it must:
 
 * Find which was not yet zeroed: go find every transaction with a specific type that indicates payment that aren't yet in **already_zeroed_transaction** collection. So it performs a *not in* operation.
 * If it finds any that wasn't yet zeroed, it must check how much is still has left. In order to do so, it goes in the **transaction_credit_discounted** collection and sees how much was taken from that transaction.
