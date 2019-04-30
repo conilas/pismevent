@@ -13,7 +13,7 @@ Whenever we have an incoming payment, the applications must check if there's a c
 
 * Find which was not yet zeroed: go find every transaction with a specific type that indicates payment that aren't yet in **already_zeroed_transaction** collection. So it performs a *not in* operation.
 * If it finds any that wasn't yet zeroed, it must check how much is still has left. In order to do so, it goes in the **transaction_credit_discounted** collection and sees how much was taken from that transaction.
-* From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **transaction_credit_discounted** and then will perform the inserts related to the transaction.
+* From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **transaction_credit_discounted** and then create the other events related to the transaction.
 
 
 Como achar transações não abatidas: Todas que estão em transactions mas que não estão em already_drawbacked_transactions.
