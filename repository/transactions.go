@@ -25,7 +25,7 @@ func FindTransactionsNotIn(excluded []interface{}) []primitive.M {
 func FindAllZeroedPurchaseTransactions() []interface{}{
   results := findAll(zeroedPurchaseEvent)
 
-  parsed := _map(results, _toObjectIdFrom("transaction_id"))
+  parsed := Map(results, _toObjectIdFrom("transaction_id"))
 
   return parsed
 }

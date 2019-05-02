@@ -4,21 +4,28 @@ import (
 	"log"
 	"github.com/gin-gonic/gin"
 	"eventsourcismo/utils"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	repository "eventsourcismo/repository"
 )
 
-func FindUndownedPurchases(ctx *gin.Context) {
+type TransactionIdAndAmountLeft struct {
+	Id primitive.ObjectID
+
+	AmountLeft float64
+}
+
+func PerformPayment(ctx *gin.Context) {
 	alreadyZeroed := repository.FindAllZeroedPurchaseTransactions()
 	notZeroed 		:= repository.FindTransactionsNotIn(alreadyZeroed)
 
-	for _, value := range notZeroed {
+	leftToPay := repository.Map(notZeroed, func(value bson.M) interface{} {
 		total := value["amount"].(float64)
 		paid  := utils.ReduceNumbers(repository.FindDownedFrom(value["_id"]), utils.Sum)
+		return TransactionIdAndAmountLeft{AmountLeft: total-paid, Id: value["_id"].(primitive.ObjectID)}
+	})
 
-		log.Printf("[DEBUG] Total: %v", total)
-		log.Printf("[DEBUG] Already paid: %v", paid)
-		log.Printf("[DEBUG] Missing: %v", (total - paid))
-	}
+	log.Printf("%v", leftToPay)
 
 	ctx.JSON(200, gin.H{
 		"still_active": notZeroed,

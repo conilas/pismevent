@@ -7,7 +7,7 @@ import (
   "go.mongodb.org/mongo-driver/mongo"
 )
 
-func _map(values []bson.M, f func(bson.M) interface{}) []interface{}{
+func Map(values []bson.M, f func(bson.M) interface{}) []interface{}{
   mapped := make([]interface{}, len(values))
 
   for k, v := range values {
@@ -16,6 +16,7 @@ func _map(values []bson.M, f func(bson.M) interface{}) []interface{}{
 
   return mapped
 }
+
 
 func _toObjectIdFrom(from string) func (v bson.M) interface{} {
   return func(val bson.M) interface{} {
@@ -34,7 +35,7 @@ func _partialApplyMap(toMap string) func (v bson.M) interface{} {
 }
 
 func _mapTo(values []bson.M, toMap string) []interface{} {
-  return _map(values, _partialApplyMap(toMap))
+  return Map(values, _partialApplyMap(toMap))
 }
 
 func mountResponses(query *mongo.Cursor) []bson.M {
