@@ -2,6 +2,7 @@ package repository
 
 import (
   "log"
+  "sort"
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
   "go.mongodb.org/mongo-driver/mongo"
@@ -36,6 +37,29 @@ func _partialApplyMap(toMap string) func (v bson.M) interface{} {
 
 func _mapTo(values []bson.M, toMap string) []interface{} {
   return Map(values, _partialApplyMap(toMap))
+}
+
+//this is to overcome the lack of sort function in the current mongodb driver
+//or, at least, I couldn't find one, lol
+//one other thing: it copies the results to another variable in order to avoid
+//in-place modification (because it'd bring side effects)
+func sortByUrgency(results []primitive.M) []primitive.M{
+  results_clone := make([]primitive.M, len(results))
+
+  copy(results_clone, results)
+
+  sort.Slice(results_clone, func(i, j int) bool {
+    first_operation, second_operation := results_clone[i]["operation"].(bson.M), results_clone[j]["operation"].(bson.M)
+    first_charge_order, second_charge_order := first_operation["charge_order"].(float64), second_operation["charge_order"].(float64)
+
+    if (first_charge_order == second_charge_order) {
+      return results_clone[i]["event_date"].(primitive.DateTime) < results_clone[j]["event_date"].(primitive.DateTime)
+    }
+
+    return first_charge_order < second_charge_order
+  })
+
+  return results_clone
 }
 
 func mountResponses(query *mongo.Cursor) []bson.M {

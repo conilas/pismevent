@@ -1,10 +1,31 @@
 package repository
 
 import (
-
+  "log"
+  "time"
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type Operation struct {
+  _type string `json: type`
+
+  charge_order float64
+}
+
+type Transaction struct {
+  _id primitive.ObjectID
+
+  account_id string
+
+  operation Operation
+
+  amount float64
+
+  event_date time.Time
+
+  due_date time.Time
+}
 
 func FindDownedFrom(_id interface{}) []interface{} {
   mongoQuery := bson.D{{"related_purchase_transaction", _id.(primitive.ObjectID).Hex()}}
@@ -19,7 +40,13 @@ func FindTransactionsNotIn(excluded []interface{}) []primitive.M {
 
   results := findQuery(transactions, mongoQuery)
 
-  return results //_mapTo(results, "_id")
+  sortedResults := sortByUrgency(results)
+
+  log.Printf("%v", sortedResults)
+
+  log.Printf("%v", _mapTo(sortedResults, "_id"))
+
+  return sortByUrgency(sortedResults) 
 }
 
 func FindAllZeroedPurchaseTransactions() []interface{}{
