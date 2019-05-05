@@ -79,10 +79,17 @@ func PerformPurchase(ctx *gin.Context) {
   receivedPurchase := parsePurchase(ctx)
 
 	//TODO: validate account existance cause in this case we are cheering for it to exist lol
-	account   			 := repository.FindAccountFromId(receivedPurchase.Account_id)
+	account, err   			 := repository.FindAccountFromId(receivedPurchase.Account_id)
+
+	if (err != nil ) {
+		ctx.JSON(400, gin.H{
+			"message": fmt.Sprintf("Invalid account id: %v", receivedPurchase.Account_id),
+		})
+
+		return
+	}
 
   //TODO ask what is the due_date for
-
 	allEventsFromAccount      := repository.FindEventsAmountsFromAccount(receivedPurchase.Account_id)
 	valueInTotal 				      := utils.ReduceNumbers(allEventsFromAccount, utils.Sum)
 	currentAccountCreditLimit := account.Available_credit_limit + valueInTotal

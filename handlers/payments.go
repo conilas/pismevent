@@ -67,7 +67,7 @@ func processPurchaseDownings(initial float64, unpaidTransactions []interface{},p
 }
 
 func processPayment(payment ReceivedPayment) (float64, string) {
-	_   					    = repository.FindAccountFromId(payment.Account_id)
+	_,_   					    = repository.FindAccountFromId(payment.Account_id)
 	//TODO: validate account existance
 	alreadyZeroed    := repository.FindAllZeroedPurchaseTransactions()
 	notZeroed 		   := repository.FindUnpaidTransactions(alreadyZeroed)
