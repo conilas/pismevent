@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"time"
@@ -59,7 +60,6 @@ func processPaymentDownings(initial float64, unpaidTransactions []interface{},pu
 }
 
 func processPurchase(payment repository.Transaction) (float64, string){
-	_   					    = repository.FindAccountFromId(payment.Account_id)
   alreadyZeroed    := repository.FindAllZeroedPaymentTransactions()
 	notZeroed 		   := repository.FindUnzeroedPayments(alreadyZeroed)
 
@@ -78,10 +78,23 @@ func PerformPurchase(ctx *gin.Context) {
 
   receivedPurchase := parsePurchase(ctx)
 
+	//TODO: validate account existance cause in this case we are cheering for it to exist lol
+	account   			 := repository.FindAccountFromId(receivedPurchase.Account_id)
+
   //TODO ask what is the due_date for
 
-	//TODO: validate account existance & check if it has credit enough to perform this operation
-	//in order to check that, we must mount the history for the account in the account_credits
+	allEventsFromAccount      := repository.FindEventsAmountsFromAccount(receivedPurchase.Account_id)
+	valueInTotal 				      := utils.ReduceNumbers(allEventsFromAccount, utils.Sum)
+	currentAccountCreditLimit := account.Available_credit_limit + valueInTotal
+
+	if (currentAccountCreditLimit < receivedPurchase.Amount) {
+		ctx.JSON(400, gin.H{
+			"message": fmt.Sprintf("Not enough limit on account. You have: %v", currentAccountCreditLimit),
+		})
+
+		return
+	}
+
 	moneyLeft, transactionId        := processPurchase(repository.Transaction{Account_id: receivedPurchase.Account_id,
     Operation: utils.AllowedTransactionTypes[receivedPurchase.Operation_type_id],
     Amount: receivedPurchase.Amount, Event_date: time.Now()})
@@ -93,6 +106,6 @@ func PerformPurchase(ctx *gin.Context) {
 	log.Printf("[DEBUG] Heya! After all payments, we still have %v left.", moneyLeft)
 
 	ctx.JSON(200, gin.H{
-		"still_active": "",
+		"current_account_limit": currentAccountCreditLimit - receivedPurchase.Amount,
 	})
 }
