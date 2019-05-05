@@ -1,7 +1,6 @@
 package repository
 
 import (
-  // "log"
   "time"
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,8 +14,15 @@ type DownedEvent struct {
   Event_date time.Time
 }
 
+func FindDownedPaymentsFrom(_id interface{}) []interface{} {
+  mongoQuery := bson.D{{"related_payment_transaction", _id.(primitive.ObjectID).Hex()}}
 
-func FindDownedFrom(_id interface{}) []interface{} {
+  results := findQuery(downedPaymentEvent, mongoQuery)
+
+  return _mapTo(results, "value")
+}
+
+func FindDownedPurchasesFrom(_id interface{}) []interface{} {
   mongoQuery := bson.D{{"related_purchase_transaction", _id.(primitive.ObjectID).Hex()}}
 
   results := findQuery(downedPurchaseEvent, mongoQuery)

@@ -11,6 +11,15 @@ type ZeroedPaymentEvent struct {
   Last_downed_event  string
 }
 
+
+func FindAllZeroedPaymentTransactions() []interface{}{
+  results := findAll(zeroedPaymentEvent)
+
+  parsed := Map(results, _toObjectIdFrom("transaction_id"))
+
+  return parsed
+}
+
 func CreateZeroedPaymentEvent(event ZeroedPaymentEvent) (string, error){
   return insertOne(zeroedPaymentEvent, event)
 }

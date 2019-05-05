@@ -26,10 +26,24 @@ type Transaction struct {
   Due_date time.Time
 }
 
+func CreateTransaction(transaction Transaction) (string, error)  {
+  return insertOne(transactions, transaction)
+}
+
 func CreatePaymentTransaction(transaction Transaction) (string, error)  {
   transaction.Operation = Operation{Type: "PAYMENT", Charge_order: 0}
 
   return insertOne(transactions, transaction)
+}
+
+func FindUnzeroedPayments(excluded []interface{}) []primitive.M {
+  mongoQuery := bson.D{{"_id", bson.D{{"$nin", excluded}}}, {"operation.type", bson.D{{"$in", paymentTypes}}}}
+
+  results := findQuery(transactions, mongoQuery)
+
+  sortedResults := sortByUrgency(results)
+
+  return sortByUrgency(sortedResults)
 }
 
 func FindUnpaidTransactions(excluded []interface{}) []primitive.M {
@@ -40,20 +54,6 @@ func FindUnpaidTransactions(excluded []interface{}) []primitive.M {
   sortedResults := sortByUrgency(results)
 
   return sortByUrgency(sortedResults)
-}
-
-func FindAllZeroedPurchaseTransactions() []interface{}{
-  results := findAll(zeroedPurchaseEvent)
-
-  parsed := Map(results, _toObjectIdFrom("transaction_id"))
-
-  return parsed
-}
-
-func FindAllZeroedPaymentTransactions() []interface{}{
-  results := _mapTo(findAll(zeroedPaymentEvent), "_id" )
-
-  return results
 }
 
 func FindAllTransactions() []interface{}{

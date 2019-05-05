@@ -37,6 +37,7 @@ func processPurchaseDownings(initial float64, unpaidTransactions []interface{},p
 	for _, unpaidTransactions := range unpaidTransactions {
 		currentTransaction := unpaidTransactions.(TransactionIdAndAmountLeft)
 		eventAmount 			 := math.Min(currentTransaction.AmountLeft, moneyLeft)
+		perfectFit         := currentTransaction.AmountLeft == moneyLeft
 		moneyLeft 				  = moneyLeft - eventAmount
 
 		downedEvent := repository.DownedEvent{Related_purchase_transaction: currentTransaction.Id.Hex(),
@@ -47,6 +48,12 @@ func processPurchaseDownings(initial float64, unpaidTransactions []interface{},p
 		purchaseDownedId, _  := repository.CreateDownedPurchaseEvent(downedEvent)
 
 		if (moneyLeft == 0) {
+
+			if (perfectFit) {
+				repository.CreateZeroedPurchaseEvent(repository.ZeroedPurchaseEvent{Transaction_id: currentTransaction.Id.Hex(),
+					Event_date: time.Now(), Last_downed_event: purchaseDownedId})
+			}
+
 			repository.CreateZeroedPaymentEvent(repository.ZeroedPaymentEvent{Transaction_id: paymentTransactionId,
 				Event_date: time.Now(), Last_downed_event: paymentDownedId})
 			break
@@ -69,7 +76,7 @@ func processPayment(payment ReceivedPayment) float64{
 
 	unpaidTransactions := repository.Map(notZeroed, func(value bson.M) interface{} {
 		total := value["amount"].(float64)
-		alreadyPaid  := utils.ReduceNumbers(repository.FindDownedFrom(value["_id"]), utils.Sum)
+		alreadyPaid  := utils.ReduceNumbers(repository.FindDownedPurchasesFrom(value["_id"]), utils.Sum)
 		return TransactionIdAndAmountLeft{AmountLeft: total-alreadyPaid, Id: value["_id"].(primitive.ObjectID)}
 	})
 
@@ -84,7 +91,6 @@ func PerformPayment(ctx *gin.Context) {
 	for _, receivedPayment := range receivedPayments {
 		log.Printf("[DEBUG] Received: %v", receivedPayment)
 		moneyLeft = processPayment(receivedPayment)
-		if (moneyLeft == 0 ) { break }
 	}
 
 	log.Printf("[DEBUG] Heya! After all payments, we still have %v left.", moneyLeft)

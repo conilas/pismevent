@@ -19,9 +19,9 @@ func ReduceNumbers(values []interface{}, f func(float64, float64) float64) float
   var acc float64 = 0
 
   for k, v := range values {
-    if k+1 < len(values) {
-      acc  = acc + f(v.(float64), values[k+1].(float64))
-    } else if k == 0 {
+    if k < len(values) {
+      acc  = f(v.(float64), acc)
+    } else if len(values) == 1 {
       acc = v.(float64)
     }
   }
