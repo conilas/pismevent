@@ -18,6 +18,12 @@ func Map(values []bson.M, f func(bson.M) interface{}) []interface{}{
   return mapped
 }
 
+func mountQueryFromId(_id string) bson.M {
+  parsedId, _   := primitive.ObjectIDFromHex(_id)
+  mongoQuery := bson.M{"_id": parsedId}
+  return mongoQuery
+}
+
 
 func _toObjectIdFrom(from string) func (v bson.M) interface{} {
   return func(val bson.M) interface{} {
@@ -73,6 +79,20 @@ func mountResponses(query *mongo.Cursor) []bson.M {
   }
 
   return numbers
+}
+
+func insertOne(collection *mongo.Collection, value interface{}) (string, error){
+  returnedValue, err := collection.InsertOne(ctx, value)
+
+  return returnedValue.InsertedID.(primitive.ObjectID).Hex(), err
+}
+
+func findOneById(collection *mongo.Collection, _id string) *mongo.SingleResult {
+  return collection.FindOne(ctx, mountQueryFromId(_id))
+}
+
+func findOneQuery(collection *mongo.Collection, mongoQuery bson.M) *mongo.SingleResult {
+  return collection.FindOne(ctx, mongoQuery)
 }
 
 func findQuery(collection *mongo.Collection, mongoQuery bson.D) []bson.M {

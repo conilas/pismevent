@@ -1,52 +1,45 @@
 package repository
 
 import (
-  "log"
   "time"
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Operation struct {
-  _type string `json: type`
+  Type string `json: type`
 
-  charge_order float64
+  Charge_order float64
 }
 
 type Transaction struct {
   _id primitive.ObjectID
 
-  account_id string
+  Account_id string
 
-  operation Operation
+  Operation Operation
 
-  amount float64
+  Amount float64
 
-  event_date time.Time
+  Event_date time.Time
 
-  due_date time.Time
+  Due_date time.Time
 }
 
-func FindDownedFrom(_id interface{}) []interface{} {
-  mongoQuery := bson.D{{"related_purchase_transaction", _id.(primitive.ObjectID).Hex()}}
+func CreatePaymentTransaction(transaction Transaction) (string, error)  {
+  transaction.Operation = Operation{Type: "PAYMENT", Charge_order: 0}
 
-  results := findQuery(downedPurchaseEvent, mongoQuery)
-
-  return _mapTo(results, "value")
+  return insertOne(transactions, transaction)
 }
 
-func FindTransactionsNotIn(excluded []interface{}) []primitive.M {
+func FindUnpaidTransactions(excluded []interface{}) []primitive.M {
   mongoQuery := bson.D{{"_id", bson.D{{"$nin", excluded}}}, {"operation.type", bson.D{{"$in", purchasesTypes}}}}
 
   results := findQuery(transactions, mongoQuery)
 
   sortedResults := sortByUrgency(results)
 
-  log.Printf("%v", sortedResults)
-
-  log.Printf("%v", _mapTo(sortedResults, "_id"))
-
-  return sortByUrgency(sortedResults) 
+  return sortByUrgency(sortedResults)
 }
 
 func FindAllZeroedPurchaseTransactions() []interface{}{
