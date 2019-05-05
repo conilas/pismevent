@@ -58,10 +58,9 @@ func processPaymentDownings(initial float64, unpaidTransactions []interface{},pu
 	return moneyLeft
 }
 
-func processPurchase(payment repository.Transaction) float64{
+func processPurchase(payment repository.Transaction) (float64, string){
 	_   					    = repository.FindAccountFromId(payment.Account_id)
-  //TODO: validate account existance
-	alreadyZeroed    := repository.FindAllZeroedPaymentTransactions()
+  alreadyZeroed    := repository.FindAllZeroedPaymentTransactions()
 	notZeroed 		   := repository.FindUnzeroedPayments(alreadyZeroed)
 
 	transactionId, _ := repository.CreateTransaction(payment)
@@ -72,7 +71,7 @@ func processPurchase(payment repository.Transaction) float64{
 		return TransactionIdAndAmountLeft{AmountLeft: total-alreadyPaid, Id: value["_id"].(primitive.ObjectID)}
 	})
 
-	return processPaymentDownings(payment.Amount, transactionsWithCredit, transactionId)
+	return processPaymentDownings(payment.Amount, transactionsWithCredit, transactionId), transactionId
 }
 
 func PerformPurchase(ctx *gin.Context) {
@@ -80,13 +79,18 @@ func PerformPurchase(ctx *gin.Context) {
   receivedPurchase := parsePurchase(ctx)
 
   //TODO ask what is the due_date for
-	moneyLeft        := processPurchase(repository.Transaction{Account_id: receivedPurchase.Account_id,
+
+	//TODO: validate account existance & check if it has credit enough to perform this operation
+	//in order to check that, we must mount the history for the account in the account_credits
+	moneyLeft, transactionId        := processPurchase(repository.Transaction{Account_id: receivedPurchase.Account_id,
     Operation: utils.AllowedTransactionTypes[receivedPurchase.Operation_type_id],
     Amount: receivedPurchase.Amount, Event_date: time.Now()})
 
-	log.Printf("[DEBUG] Heya! After all payments, we still have %v left.", moneyLeft)
+	repository.CreateAccountCreditEvent(repository.AccountCreditEvent{Account_id: receivedPurchase.Account_id,
+		Amount: - receivedPurchase.Amount, Transaction_id: transactionId, Event_date: time.Now(),
+	})
 
-	//TODO create an event with putting the moneyLeft on the creditLimit for the person
+	log.Printf("[DEBUG] Heya! After all payments, we still have %v left.", moneyLeft)
 
 	ctx.JSON(200, gin.H{
 		"still_active": "",

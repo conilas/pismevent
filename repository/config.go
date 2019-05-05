@@ -16,6 +16,7 @@ var zeroedPurchaseEvent *mongo.Collection
 var downedPaymentEvent *mongo.Collection
 var downedPurchaseEvent *mongo.Collection
 var accounts *mongo.Collection
+var accountCreditEvent *mongo.Collection
 
 func mountAllCollections() {
   transactions        = db.Collection("transactions")
@@ -24,6 +25,7 @@ func mountAllCollections() {
   downedPaymentEvent  = db.Collection("downed_payment_event")
   downedPurchaseEvent = db.Collection("downed_purchase_event")
   accounts            = db.Collection("accounts")
+  accountCreditEvent  = db.Collection("account_credit_event")
 }
 
 func init() {
