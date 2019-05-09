@@ -34,6 +34,24 @@ func parseLimitChanger(ctx *gin.Context) LimitChanger {
   return limits
 }
 
+func CreateAccount(ctx *gin.Context) {
+	account   := parseLimitChanger(ctx)
+	accountId, err := repository.CreateAccount(repository.AccountCreation{Available_credit_limit: account.Available_credit_limit.Amount,
+		Available_withdraw_limit: account.Available_withdrawl_limit.Amount})
+
+	if (err != nil){
+		ctx.JSON(500, gin.H{
+			"message": err,
+		})
+
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"id": accountId,
+	})
+}
+
 func PerformActionOnAccount(ctx *gin.Context) {
 	accountId      := ctx.Param("id")
 	_, err   := repository.FindAccountFromId(accountId)

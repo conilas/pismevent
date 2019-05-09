@@ -1,0 +1,16 @@
+version: '3.3'
+services:
+  mongo:
+    image: 'mongo:latest'
+    container_name: 'mongo'
+    ports:
+      - '27017:27017'
+  api:
+    container_name: 'api'
+    build: '.'
+    ports:
+      - '3031:3031'
+    volumes:
+      - '.:/go/src/eventsourcismo'
+    depends_on:
+      - 'mongo'

@@ -13,8 +13,18 @@ type Account struct {
   Available_withdraw_limit float64
 }
 
+type AccountCreation struct {
+  Available_credit_limit float64
+
+  Available_withdraw_limit float64
+}
+
 func FindAllAccounts() []bson.M{
   return findAll(accounts)
+}
+
+func CreateAccount(event AccountCreation) (string, error){
+  return insertOne(accounts, event)
 }
 
 func FindAccountFromId(_id string)  (Account, error){
@@ -32,5 +42,5 @@ func FindAccountFromId(_id string)  (Account, error){
     Available_credit_limit: acc.Available_credit_limit,
     Id: _id,
   }, nil
- 
+
 }
