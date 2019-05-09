@@ -66,9 +66,11 @@ func processPurchaseDownings(initial float64, unpaidTransactions []interface{},p
 	return moneyLeft
 }
 
-func processPayment(payment ReceivedPayment) (float64, string) {
-	_,_   					    = repository.FindAccountFromId(payment.Account_id)
-	//TODO: validate account existance
+func processPayment(payment ReceivedPayment) (float64, string, error) {
+	_,err   					    := repository.FindAccountFromId(payment.Account_id)
+
+	if (err != nil) { return 0, "", err }
+
 	alreadyZeroed    := repository.FindAllZeroedPurchaseTransactions()
 	notZeroed 		   := repository.FindUnpaidTransactions(alreadyZeroed)
 
@@ -81,7 +83,7 @@ func processPayment(payment ReceivedPayment) (float64, string) {
 		return TransactionIdAndAmountLeft{AmountLeft: total-alreadyPaid, Id: value["_id"].(primitive.ObjectID)}
 	})
 
-	return processPurchaseDownings(payment.Amount, unpaidTransactions, transactionId), transactionId
+	return processPurchaseDownings(payment.Amount, unpaidTransactions, transactionId), transactionId, nil
 }
 
 
@@ -91,11 +93,14 @@ func PerformPayment(ctx *gin.Context) {
 
 	for _, receivedPayment := range receivedPayments {
 		log.Printf("[DEBUG] Received: %v", receivedPayment)
-		_, transactionId := processPayment(receivedPayment)
+		_, transactionId, err := processPayment(receivedPayment)
 
-		repository.CreateAccountCreditEvent(repository.AccountCreditEvent{Account_id: receivedPayment.Account_id,
-			Amount: receivedPayment.Amount, Transaction_id: transactionId, Event_date: time.Now(),
-		})
+		if (err == nil) {
+				repository.CreateAccountCreditEvent(repository.AccountCreditEvent{Account_id: receivedPayment.Account_id,
+					Amount: receivedPayment.Amount, Transaction_id: transactionId, Event_date: time.Now(),
+				})
+		}
+
 	}
 
 	ctx.JSON(200, gin.H{

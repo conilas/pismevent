@@ -5,12 +5,26 @@ import (
 	"log"
 	"math"
 	"time"
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"eventsourcismo/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	repository "eventsourcismo/repository"
 )
+
+var ValidationPerOperation = map[int] func(repository.Account, float64) (float64, error){
+  1: validatePurchaseAmount,
+  2: validatePurchaseAmount,
+  3: validateWithdrawlAmount,
+}
+
+var ProcessPerOperation = map[int] func(repository.Transaction) (float64){
+  1: processPurchase,
+  2: processPurchase,
+  3: processWithdrawl,
+}
 
 type ReceivedPurchase struct {
 	Account_id     string     `json:"account_id"`
@@ -59,7 +73,18 @@ func processPaymentDownings(initial float64, unpaidTransactions []interface{},pu
 	return moneyLeft
 }
 
-func processPurchase(payment repository.Transaction) (float64, string){
+func processWithdrawl(payment repository.Transaction) (float64){
+
+	transactionId, _ := repository.CreateTransaction(payment)
+
+	repository.CreateAccountWithdrawlEvent(repository.AccountWithdrawlEvent{Account_id: payment.Account_id,
+		Amount: - payment.Amount, Transaction_id: transactionId, Event_date: time.Now(),
+	})
+
+	return 0
+}
+
+func processPurchase(payment repository.Transaction) (float64){
   alreadyZeroed    := repository.FindAllZeroedPaymentTransactions()
 	notZeroed 		   := repository.FindUnzeroedPayments(alreadyZeroed)
 
@@ -71,17 +96,44 @@ func processPurchase(payment repository.Transaction) (float64, string){
 		return TransactionIdAndAmountLeft{AmountLeft: total-alreadyPaid, Id: value["_id"].(primitive.ObjectID)}
 	})
 
-	return processPaymentDownings(payment.Amount, transactionsWithCredit, transactionId), transactionId
+	repository.CreateAccountCreditEvent(repository.AccountCreditEvent{Account_id: payment.Account_id,
+		Amount: - payment.Amount, Transaction_id: transactionId, Event_date: time.Now(),
+	})
+
+	return processPaymentDownings(payment.Amount, transactionsWithCredit, transactionId)
+}
+
+func validateWithdrawlAmount(account repository.Account, needed float64) (float64, error) {
+	allWithdrawlEvents 				  := repository.FindWithdrawlEventsAmountsFromAccount(account.Id)
+	withdrawlValueInTotal 			:= utils.ReduceNumbers(allWithdrawlEvents, utils.Sum)
+	currentAccountWithdrawLimit := account.Available_withdraw_limit + withdrawlValueInTotal
+
+	if (currentAccountWithdrawLimit < needed) {
+		return 0, errors.New("Insuficient amount")
+	}
+
+	return currentAccountWithdrawLimit, nil
+}
+
+func validatePurchaseAmount(account repository.Account, needed float64) (float64, error){
+	allEventsFromAccount      := repository.FindEventsAmountsFromAccount(account.Id)
+	valueInTotal 				      := utils.ReduceNumbers(allEventsFromAccount, utils.Sum)
+	currentAccountCreditLimit := account.Available_credit_limit + valueInTotal
+
+	if (currentAccountCreditLimit < needed) {
+		return 0, errors.New("Insuficient amount")
+	}
+
+	return currentAccountCreditLimit, nil
 }
 
 func PerformPurchase(ctx *gin.Context) {
 
   receivedPurchase := parsePurchase(ctx)
 
-	//TODO: validate account existance cause in this case we are cheering for it to exist lol
 	account, err   			 := repository.FindAccountFromId(receivedPurchase.Account_id)
 
-	if (err != nil ) {
+	if (err != nil) {
 		ctx.JSON(400, gin.H{
 			"message": fmt.Sprintf("Invalid account id: %v", receivedPurchase.Account_id),
 		})
@@ -89,12 +141,11 @@ func PerformPurchase(ctx *gin.Context) {
 		return
 	}
 
-  //TODO ask what is the due_date for
-	allEventsFromAccount      := repository.FindEventsAmountsFromAccount(receivedPurchase.Account_id)
-	valueInTotal 				      := utils.ReduceNumbers(allEventsFromAccount, utils.Sum)
-	currentAccountCreditLimit := account.Available_credit_limit + valueInTotal
+	//TODO create operation type validation
 
-	if (currentAccountCreditLimit < receivedPurchase.Amount) {
+	currentAccountCreditLimit, err := ValidationPerOperation[receivedPurchase.Operation_type_id](account, receivedPurchase.Amount)
+
+	if (err != nil) {
 		ctx.JSON(400, gin.H{
 			"message": fmt.Sprintf("Not enough limit on account. You have: %v", currentAccountCreditLimit),
 		})
@@ -102,13 +153,10 @@ func PerformPurchase(ctx *gin.Context) {
 		return
 	}
 
-	moneyLeft, transactionId        := processPurchase(repository.Transaction{Account_id: receivedPurchase.Account_id,
+	moneyLeft        := ProcessPerOperation[receivedPurchase.Operation_type_id] (repository.Transaction{Account_id: receivedPurchase.Account_id,
     Operation: utils.AllowedTransactionTypes[receivedPurchase.Operation_type_id],
     Amount: receivedPurchase.Amount, Event_date: time.Now()})
 
-	repository.CreateAccountCreditEvent(repository.AccountCreditEvent{Account_id: receivedPurchase.Account_id,
-		Amount: - receivedPurchase.Amount, Transaction_id: transactionId, Event_date: time.Now(),
-	})
 
 	log.Printf("[DEBUG] Heya! After all payments, we still have %v left.", moneyLeft)
 

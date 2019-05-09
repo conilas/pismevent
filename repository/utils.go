@@ -35,14 +35,14 @@ func _toObjectIdFrom(from string) func (v bson.M) interface{} {
 //This is a curried function that will first receive a string argument that represents
 //what it needs to map to. It then returns the mapping closure with the argument
 //toMap already applied
-func _partialApplyMap(toMap string) func (v bson.M) interface{} {
+func PartialApplyMap(toMap string) func (v bson.M) interface{} {
     return func (v bson.M) interface{}{
       return v[toMap]
     }
 }
 
 func _mapTo(values []bson.M, toMap string) []interface{} {
-  return Map(values, _partialApplyMap(toMap))
+  return Map(values, PartialApplyMap(toMap))
 }
 
 //this is to overcome the lack of sort function in the current mongodb driver
