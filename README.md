@@ -35,7 +35,16 @@ Whenever we have an incoming purchase, we will follow a flow that is almost like
 * If it finds any that wasn't yet zeroed, it must check how much is still has left. In order to do so, it goes in the **zeroed_payment_event** collection and sees how much was taken from that transaction.
 * From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **zeroed_payment_event** and then create the other events related to the transaction.
 
-### Not good enough? Interested? Check the doc, which contains two flowcharts to explain the idea.
+### Not good enough? Interested? Check the doc, which contains two flowcharts to explain the idea. Also, there's an explanation of why I chose to go with an event-source approach.
 
-  
-  
+## The stack
+
+The application is built with mongodb to provide a simple document storage database and using the Gin framework in golang. The library to access the database is the one created by the mongo guys.
+
+## The code/folder structure
+
+* ```main.go``` - contains the entry point of the application, which only gets it up and running;
+* ```handlers``` - contains all the handlers for the endpoints of the api
+* ```reposioty``` - contains everything db-related (the config, the mongo connection and so on)
+* ```utils``` - just some functional utils for the code to be written smoothly :-)
+* ```doc``` - contains the doc needed (endpoints and so on)
