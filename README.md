@@ -11,17 +11,20 @@ The approach would also be simple if it wasn't for the validations one must do f
 
 Whenever we have an incoming payment, the applications must check if there's a credit transaction that wasn't yet zeroed and, if so, create some related events. Let's say that, in this case, we do have some values that were already credited and we must validate it. In order to do so, it must:
 
-* Find which was not yet zeroed: go find every transaction with a specific type that indicates payment that aren't yet in **already_zeroed_transaction** collection. So it performs a *not in* operation.
-* If it finds any that wasn't yet zeroed, it must check how much is still has left. In order to do so, it goes in the **transaction_credit_discounted** collection and sees how much was taken from that transaction.
-* From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **transaction_credit_discounted** and then create the other events related to the transaction.
+* Find which was not yet zeroed: go find every transaction with a specific type that indicates payment that aren't yet in **zeroed_purchase_event** collection. So it performs a *not in* operation.
+* If it finds any that wasn't yet zeroed, it must check how much is still has left. In order to do so, it goes in the **downed_purchase_event** collection and sees how much was taken from that transaction.
+* From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **downed_purchase_event** and then create the other events related to the transaction.
 
+## Example 2: Incoming purchase 
 
-Como achar transações não abatidas: Todas que estão em transactions mas que não estão em already_drawbacked_transactions.
-  Como achar seu valor para abatimento: Montar o histórico vindo da transaction_drawbacks;
-  Quando é necessário achar seu valor abatido: Quando entra uma nova transação de crédito;
-  
-Como achar transações com valor a ser abatido: Todas que estão em transactions mas não estão em already_zeroed_transactions.
-  Como achar seu valor de crédito: Montar o histórico vindo da transaction_credit;
-  Quando é necessário achar seu valor de crédito: Quando entra uma nova transação de pagamento;   
+Whenever we have an incoming purchase, we will follow a flow that is almost like the payment one, except this is a bit easier because payment *may* have more than one payment per request **and** it must order to see which transactions were killed. So, in a way, we:
+
+* First, check if the operation type is credit-related or withdrawl-related. Create an event on the necessary collection (either **account_withdrawl_event** or **account_credit_event**).
+* Find which still have some credit: go find every transaction with a specific type that indicates payment that aren't yet in **downed_payment_event** collection. So it performs a *not in* operation.
+* If it finds any that wasn't yet zeroed, it must check how much is still has left. In order to do so, it goes in the **zeroed_payment_event** collection and sees how much was taken from that transaction.
+* From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **zeroed_payment_event** and then create the other events related to the transaction.
+
+### Not good enough? Interested? Check the doc, which contains two flowcharts to explain the idea.
+
   
   
