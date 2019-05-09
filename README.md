@@ -7,6 +7,17 @@ The idea is to perform the challenge but in a event-sourced way. In order to do 
 
 The approach would also be simple if it wasn't for the validations one must do for each of those transactions. I'll show some of them below and explain how they were overcome.
 
+## Before everything: running
+
+In order to run, one must:
+
+```
+git clone https://github.com/conilas/pismevent/
+docker-compose up -d --build
+```
+
+The application will be available at the port ```3031```.
+
 ## Example 1: Incoming payment (installment or in cash)
 
 Whenever we have an incoming payment, the applications must check if there's a credit transaction that wasn't yet zeroed and, if so, create some related events. Let's say that, in this case, we do have some values that were already credited and we must validate it. In order to do so, it must:
