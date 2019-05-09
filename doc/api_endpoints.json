@@ -1,0 +1,189 @@
+{
+	"_type": "export",
+	"__export_format": 3,
+	"__export_date": "2019-05-09T23:04:41.310Z",
+	"__export_source": "insomnia.desktop.app:v6.3.2",
+	"resources": [
+		{
+			"_id": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"created": 1557018768548,
+			"description": "",
+			"modified": 1557018777266,
+			"name": "Pismo",
+			"parentId": null,
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_d81e3a26bc5d47c8b0b6bf0ebb1a7c0f",
+			"color": null,
+			"created": 1557018768742,
+			"data": {},
+			"isPrivate": false,
+			"metaSortKey": 1557018768742,
+			"modified": 1557018768742,
+			"name": "New Environment",
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"_type": "environment"
+		},
+		{
+			"_id": "jar_5fec2e5886e14dcea5407a40442c684b",
+			"cookies": [],
+			"created": 1557018768744,
+			"modified": 1557018768744,
+			"name": "Default Jar",
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"_type": "cookie_jar"
+		},
+		{
+			"_id": "req_8a9710ed9dcf45e781171727c1f73924",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "[\n\t{\n\t\t\"account_id\": \"5cd4ad1112a874bf01a03f39\",\n\t\t\"amount\": 400\n\t},\n\t{\n\t\t\"account_id\": \"5cd4ad1112a874bf01a03f39\",\n\t\t\"amount\": 1000\n\t}\n]"
+			},
+			"created": 1557018795186,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_53b3c89c56974ae588c3040c56aac04f",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1557018795186,
+			"method": "POST",
+			"modified": 1557441855267,
+			"name": "Create payment",
+			"parameters": [],
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3031/v1/payments",
+			"_type": "request"
+		},
+		{
+			"_id": "req_63ab19b0137f4d54ad00d6a7a6e4abdd",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"account_id\": \"5cd4ad1112a874bf01a03f39\",\n\t\"operation_type_id\": 3,\n\t\"amount\": 200\n}"
+			},
+			"created": 1557062488363,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_ef021f19528c430692defcbbe79329c7",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1557062488363,
+			"method": "POST",
+			"modified": 1557441862246,
+			"name": "Create purchase",
+			"parameters": [],
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3031/v1/transactions",
+			"_type": "request"
+		},
+		{
+			"_id": "req_82101155f76b40a08ff8abdc12e654a3",
+			"authentication": {},
+			"body": {},
+			"created": 1557331910506,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1557331910506,
+			"method": "GET",
+			"modified": 1557331911524,
+			"name": "Check account limits",
+			"parameters": [],
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:3031/v1/accounts/limits",
+			"_type": "request"
+		},
+		{
+			"_id": "req_eaf523d021d045adb574ac776b4c0f22",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"available_withdrawl_limit\": {\n\t\t\"amount\": -123\n\t}\t\n}"
+			},
+			"created": 1557331947571,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_1e7c4ad457b5462ba8fef353303eb3d1",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1557331947571,
+			"method": "PATCH",
+			"modified": 1557441821275,
+			"name": "Patch account limits",
+			"parameters": [],
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:3031/v1/accounts/5cd4ad1112a874bf01a03f39",
+			"_type": "request"
+		},
+		{
+			"_id": "req_84e733809de74a65b59fd4394e22b005",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"available_credit_limit\": {\n\t\t\"amount\": 1000\n\t},\n\t\"available_withdrawl_limit\": {\n\t\t\"amount\": 2000\n\t}\t\n}"
+			},
+			"created": 1557441501295,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_dc87130b7640412f8b1b27e37dcb8ff3",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1557441501295,
+			"method": "POST",
+			"modified": 1557441540583,
+			"name": "Create account",
+			"parameters": [],
+			"parentId": "wrk_a64951dc1d6e434c8fe227d91038411f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "http://localhost:3031/v1/accounts",
+			"_type": "request"
+		}
+	]
+}
