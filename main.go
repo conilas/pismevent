@@ -1,7 +1,7 @@
 package main
 
 import (
-	handlers "eventsourcismo/handlers"
+	handlers "pismevent/handlers"
 	"github.com/gin-gonic/gin"
 )
 

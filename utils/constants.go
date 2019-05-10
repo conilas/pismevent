@@ -1,7 +1,7 @@
 package utils
 
 import (
-  "eventsourcismo/repository"
+  "pismevent/repository"
 )
 
 var AllowedTransactionTypes = map[int] repository.Operation{

@@ -5,10 +5,10 @@ import (
 	"math"
 	"time"
 	"github.com/gin-gonic/gin"
-	"eventsourcismo/utils"
+	"pismevent/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	repository "eventsourcismo/repository"
+	repository "pismevent/repository"
 )
 
 type TransactionIdAndAmountLeft struct {
@@ -104,6 +104,6 @@ func PerformPayment(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{
-		"still_active": "",
+		"message": "Payment(s) created sucessfully",
 	})
 }

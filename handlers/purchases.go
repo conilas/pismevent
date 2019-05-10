@@ -8,10 +8,10 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"eventsourcismo/utils"
+	"pismevent/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	repository "eventsourcismo/repository"
+	repository "pismevent/repository"
 )
 
 var ValidationPerOperation = map[int] func(repository.Account, float64) (float64, error){
@@ -121,7 +121,7 @@ func validatePurchaseAmount(account repository.Account, needed float64) (float64
 	currentAccountCreditLimit := account.Available_credit_limit + valueInTotal
 
 	if (currentAccountCreditLimit < needed) {
-		return 0, errors.New("Insuficient amount")
+		return currentAccountCreditLimit, errors.New("Insuficient amount")
 	}
 
 	return currentAccountCreditLimit, nil
@@ -142,6 +142,16 @@ func PerformPurchase(ctx *gin.Context) {
 	}
 
 	//TODO create operation type validation
+
+	operationValidationFunction := ValidationPerOperation[receivedPurchase.Operation_type_id]
+
+	if (operationValidationFunction == nil) {
+		ctx.JSON(400, gin.H{
+			"message": fmt.Sprintf("Invalid opeartion type: %v. Should be in range 1..3", receivedPurchase.Operation_type_id),
+		})
+
+		return
+	}
 
 	currentAccountCreditLimit, err := ValidationPerOperation[receivedPurchase.Operation_type_id](account, receivedPurchase.Amount)
 

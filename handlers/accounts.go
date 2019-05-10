@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
-	repository "eventsourcismo/repository"
-  utils "eventsourcismo/utils"
+	repository "pismevent/repository"
+  utils "pismevent/utils"
 )
 
 type Account struct {

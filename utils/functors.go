@@ -10,7 +10,7 @@ func Map(values []interface{}, f func(interface{}) interface{}) []interface{}{
 
   return mapped
 }
-
+ 
 func Sum(v float64, v2 float64) float64 {
   return v+v2
 }
