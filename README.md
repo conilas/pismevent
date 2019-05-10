@@ -30,6 +30,24 @@ go test
 
 The application will be available at the port ```3031```.
 
+## The api doc
+
+I did not have enough time to generate the Swagger api from the Insomnia client. So, if one wishes to import the workspace of Insomnia, refer to ```/doc/api_docs``` and import the file into the client (which can be downloaded from: https://insomnia.rest/).
+
+## The stack
+
+The application is built with mongodb to provide a simple document storage database and using the Gin framework in golang. The library to access the database is the one created by the mongo guys.
+
+## The code/folder structure
+
+* ```main.go``` - contains the entry point of the application, which only gets it up and running;
+* ```handlers``` - contains all the handlers for the endpoints of the api
+* ```reposioty``` - contains everything db-related (the config, the mongo connection and so on)
+* ```utils``` - just some functional utils for the code to be written smoothly :-)
+* ```doc``` - contains the doc needed (endpoints and so on)
+
+### Now for some examples of the application's flow
+
 ## Example 1: Incoming payment (installment or in cash)
 
 Whenever we have an incoming payment, the applications must check if there's a credit transaction that wasn't yet zeroed and, if so, create some related events. Let's say that, in this case, we do have some values that were already credited and we must validate it. In order to do so, it must:
@@ -48,15 +66,3 @@ Whenever we have an incoming purchase, we will follow a flow that is almost like
 * From that value, it will check how much it must discount from the incoming transaction. That means it will insert a new value in the **zeroed_payment_event** and then create the other events related to the transaction.
 
 ### Not good enough? Interested? Check the doc, which contains two flowcharts to explain the idea. Also, there's an explanation of why I chose to go with an event-source approach.
-
-## The stack
-
-The application is built with mongodb to provide a simple document storage database and using the Gin framework in golang. The library to access the database is the one created by the mongo guys.
-
-## The code/folder structure
-
-* ```main.go``` - contains the entry point of the application, which only gets it up and running;
-* ```handlers``` - contains all the handlers for the endpoints of the api
-* ```reposioty``` - contains everything db-related (the config, the mongo connection and so on)
-* ```utils``` - just some functional utils for the code to be written smoothly :-)
-* ```doc``` - contains the doc needed (endpoints and so on)
