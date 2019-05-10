@@ -46,7 +46,7 @@ The application is built with mongodb to provide a simple document storage datab
 * ```utils``` - just some functional utils for the code to be written smoothly :-)
 * ```doc``` - contains the doc needed (endpoints and so on)
 
-### Now for some examples of the application's flow
+# Now for some examples of the application's flow
 
 ## Example 1: Incoming payment (installment or in cash)
 
