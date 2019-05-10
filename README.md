@@ -26,7 +26,7 @@ cd ../utils
 go test
 ```
 
-### Note: if you wish to run it outside of a container, please change the mongo ip on repository/constants.go
+### Note: if you wish to run it outside of a container and find any problems, try and change the mongo ip on repository/constants.go. It should work if you are running a mongod instance on localhost, but if you are not, please review that config.
 
 The application will be available at the port ```3031```.
 
