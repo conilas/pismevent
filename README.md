@@ -14,7 +14,7 @@ In order to run, one must:
 ```
 git clone https://github.com/conilas/pismevent/
 cd pismevent
-docker-compose up -d --build
+docker-compose up --build
 ```
 
 ### Note: if you wish to run it outside of a container, please change the name of the downloaded folder to eventsourcismo AND correct the mongo ip on repository/constants.go
