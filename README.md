@@ -22,7 +22,7 @@ If you wish to run tests:
 ```
 cd pismevent/handlers
 go test
-cd ../pismevent/utils
+cd ../utils
 go test
 ```
 
