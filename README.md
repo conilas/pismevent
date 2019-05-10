@@ -13,8 +13,11 @@ In order to run, one must:
 
 ```
 git clone https://github.com/conilas/pismevent/
-docker-compose up -d --build
+cd pismevent
+docker-compose up --build
 ```
+
+### Note: if you wish to run it outside of a container, please change the name of the downloaded folder to eventsourcismo AND correct the mongo ip on repository/constants.go
 
 The application will be available at the port ```3031```.
 
