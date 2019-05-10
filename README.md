@@ -17,6 +17,15 @@ cd pismevent
 docker-compose up --build
 ```
 
+If you wish to run tests:
+
+```
+cd pismevent/handlers
+go test
+cd ../pismevent/utils
+go test
+```
+
 ### Note: if you wish to run it outside of a container, please change the mongo ip on repository/constants.go
 
 The application will be available at the port ```3031```.
